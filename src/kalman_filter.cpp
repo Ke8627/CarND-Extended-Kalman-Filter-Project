@@ -30,7 +30,8 @@ void KalmanFilter::Update(const VectorXd &z) {
   /**
     * update the state by using Kalman Filter equations
   */
-  VectorXd y = z - H_ * x_;
+  VectorXd z_pred = H_ * x_;
+  VectorXd y = z - z_pred;
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
