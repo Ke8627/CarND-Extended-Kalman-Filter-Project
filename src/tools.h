@@ -7,18 +7,8 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using namespace std;
 
-class Tools {
-public:
-  /**
-  * Constructor.
-  */
-  Tools();
-
-  /**
-  * Destructor.
-  */
-  virtual ~Tools();
-
+namespace Tools 
+{
   /**
   * A helper method to calculate RMSE.
   */
@@ -28,6 +18,8 @@ public:
   * A helper method to calculate Jacobians.
   */
   MatrixXd CalculateJacobian(const VectorXd& x_state);
+
+  VectorXd ConvertCartesianToPolar(const VectorXd& x);
 
 };
 

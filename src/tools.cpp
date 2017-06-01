@@ -1,13 +1,10 @@
+#include <cmath>
 #include <iostream>
 #include "tools.h"
 
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using std::vector;
-
-Tools::Tools() {}
-
-Tools::~Tools() {}
 
 VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) 
@@ -70,4 +67,28 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state)
         (py * (vx * py - vy * px) / c3), (px * (px * vy - py * vx) / c3), (px / c2), (py / c2);
 
   return Hj;
+}
+
+VectorXd Tools::ConvertCartesianToPolar(const VectorXd& x_state)
+{
+  // Recover state parameters.
+  float px = x_state(0);
+  float py = x_state(1);
+  float vx = x_state(2);
+  float vy = x_state(3);
+
+  float c1 = sqrt(px*px+py*py);
+
+  // Check division by zero.
+  if (fabs(c1) < 0.0001)
+  {
+    throw std::runtime_error("CalculateJacobian() failed due to division by zero.");
+  }
+
+  VectorXd h(3, 1);
+  h << c1,
+       std::atan2(py, px),
+       (px * vx + py * vy) / c1;
+
+  return h;
 }

@@ -1,4 +1,6 @@
+#include <cmath>
 #include "kalman_filter.h"
+#include "tools.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -32,20 +34,43 @@ void KalmanFilter::Update(const VectorXd &z) {
   */
   VectorXd z_pred = H_ * x_;
   VectorXd y = z - z_pred;
-  MatrixXd Ht = H_.transpose();
-  MatrixXd S = H_ * P_ * Ht + R_;
+  UpdateGeneralized(y, H_);
+}
+
+void NormalizePhi(VectorXd& y)
+{
+  static const double two_pi = 2 * M_PI;
+
+  auto& phi = y[1];
+  while (phi > M_PI)
+  {
+    phi -= two_pi;
+  }
+  while (phi < -M_PI)
+  {
+    phi += two_pi;
+  }
+}
+
+void KalmanFilter::UpdateEKF(const VectorXd &z) {
+  /**
+    * update the state by using Extended Kalman Filter equations
+  */
+  VectorXd y = z - Tools::ConvertCartesianToPolar(x_);
+  NormalizePhi(y);
+  MatrixXd Hj = Tools::CalculateJacobian(x_);
+  UpdateGeneralized(y, Hj);
+}
+
+void KalmanFilter::UpdateGeneralized(const Eigen::VectorXd &y, const Eigen::MatrixXd &H)
+{
+  MatrixXd Ht = H.transpose();
+  MatrixXd S = H * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
   MatrixXd K = P_ * Ht * Si;
 
   x_ = x_ + (K * y);
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
-  P_ = (I - K * H_) * P_;
-}
-
-void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  /**
-  TODO:
-    * update the state by using Extended Kalman Filter equations
-  */
+  P_ = (I - K * H) * P_;
 }
