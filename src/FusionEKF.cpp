@@ -32,7 +32,6 @@ FusionEKF::FusionEKF() {
         0, 0, 0.09;
 
   /**
-  TODO:
     * Finish initializing the FusionEKF.
     * Set the process and measurement noises
   */
@@ -45,6 +44,14 @@ FusionEKF::FusionEKF() {
              0, 0, 1, 0,
              0, 0, 0, 1;
 
+  // state covariance matrix P
+
+  ekf_.P_ = MatrixXd(4, 4);
+
+  ekf_.P_ << 1, 0, 0, 0,
+             0, 1, 0, 0,
+             0, 0, 1000, 0,
+             0, 0, 0, 1000;
 }
 
 /**
@@ -87,8 +94,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     is_initialized_ = true;
     return;
   }
-
-  // TODO: Find P in Laser Measurements, Part 3
 
   /*****************************************************************************
    *  Prediction
