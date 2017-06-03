@@ -21,6 +21,8 @@ namespace Tools
 
   VectorXd ConvertCartesianToPolar(const VectorXd& x);
 
+  VectorXd ConvertPolarToCartesian(const VectorXd& x);
+
 };
 
 #endif /* TOOLS_H_ */

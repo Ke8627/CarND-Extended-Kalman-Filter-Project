@@ -92,3 +92,23 @@ VectorXd Tools::ConvertCartesianToPolar(const VectorXd& x_state)
 
   return h;
 }
+
+VectorXd Tools::ConvertPolarToCartesian(const VectorXd& x)
+{
+  float rho = x(0);
+  float phi = x(1);
+  float rho_dot = x(2);
+
+  float px = rho * std::cos(phi);
+  float py = rho * std::sin(phi);
+  float vx = 0;
+  float vy = 0;
+
+  VectorXd cartesian(4, 1);
+  cartesian << px,
+               py,
+               vx,
+               vy;
+
+  return cartesian;
+}
