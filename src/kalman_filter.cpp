@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include "kalman_filter.h"
 #include "tools.h"
 
@@ -57,8 +58,11 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     * update the state by using Extended Kalman Filter equations
   */
   VectorXd y = z - Tools::ConvertCartesianToPolar(x_);
+
   NormalizePhi(y);
+
   MatrixXd Hj = Tools::CalculateJacobian(x_);
+
   UpdateGeneralized(y, Hj);
 }
 
