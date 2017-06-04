@@ -10,32 +10,29 @@ KalmanFilter::KalmanFilter() {}
 
 KalmanFilter::~KalmanFilter() {}
 
-void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
-                        MatrixXd &H_in, MatrixXd &R_in, MatrixXd &Q_in) {
+void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in)
+{
   x_ = x_in;
   P_ = P_in;
   F_ = F_in;
-  H_ = H_in;
-  R_ = R_in;
-  Q_ = Q_in;
 }
 
-void KalmanFilter::Predict() {
+void KalmanFilter::Predict(const MatrixXd& Q) {
   /**
     * predict the state
   */
   x_ = F_ * x_;
   MatrixXd Ft = F_.transpose();
-  P_ = F_ * P_ * Ft + Q_;
+  P_ = F_ * P_ * Ft + Q;
 }
 
-void KalmanFilter::Update(const VectorXd &z) {
+void KalmanFilter::Update(const VectorXd &z, const MatrixXd &H, const MatrixXd &R) {
   /**
     * update the state by using Kalman Filter equations
   */
-  VectorXd z_pred = H_ * x_;
+  VectorXd z_pred = H * x_;
   VectorXd y = z - z_pred;
-  UpdateGeneralized(y, H_);
+  UpdateGeneralized(y, H, R);
 }
 
 void NormalizePhi(VectorXd& y)
@@ -53,7 +50,7 @@ void NormalizePhi(VectorXd& y)
   }
 }
 
-void KalmanFilter::UpdateEKF(const VectorXd &z) {
+void KalmanFilter::UpdateEKF(const VectorXd &z, const MatrixXd &R) {
   /**
     * update the state by using Extended Kalman Filter equations
   */
@@ -63,13 +60,13 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
   MatrixXd Hj = Tools::CalculateJacobian(x_);
 
-  UpdateGeneralized(y, Hj);
+  UpdateGeneralized(y, Hj, R);
 }
 
-void KalmanFilter::UpdateGeneralized(const Eigen::VectorXd &y, const Eigen::MatrixXd &H)
+void KalmanFilter::UpdateGeneralized(const Eigen::VectorXd &y, const Eigen::MatrixXd &H, const Eigen::MatrixXd &R)
 {
   MatrixXd Ht = H.transpose();
-  MatrixXd S = H * P_ * Ht + R_;
+  MatrixXd S = H * P_ * Ht + R;
   MatrixXd Si = S.inverse();
   MatrixXd K = P_ * Ht * Si;
 

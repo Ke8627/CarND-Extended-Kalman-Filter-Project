@@ -76,15 +76,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
          0, 0, 1000, 0,
          0, 0, 0, 1000;
 
-    MatrixXd Q(4, 4);
-
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
       VectorXd x = Tools::ConvertPolarToCartesian(measurement_pack.raw_measurements_);
 
-      ekf_.Init(x, P, F, Hj_, R_radar_, Q);
+      ekf_.Init(x, P, F);
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -93,7 +91,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       VectorXd x(4);
       x << measurement_pack.raw_measurements_(0), measurement_pack.raw_measurements_[1], 0, 0;
 
-      ekf_.Init(x, P, F, H_laser_, R_laser_, Q);
+      ekf_.Init(x, P, F);
     }
 
     // done initializing, no need to predict or update
@@ -127,12 +125,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   float dt3 = dt2 * dt / 2;
   float dt4 = dt2 * dt2 / 4;
 
-  ekf_.Q_ << (dt4 * noise_ax), 0, (dt3 * noise_ax), 0,
-             0, (dt4 * noise_ay), 0, (dt3 * noise_ay),
-             (dt3 * noise_ax), 0, (dt2 * noise_ax), 0,
-             0, (dt3 * noise_ay), 0, (dt2 * noise_ay);
+  MatrixXd Q(4, 4);
 
-  ekf_.Predict();
+  Q << (dt4 * noise_ax), 0, (dt3 * noise_ax), 0,
+       0, (dt4 * noise_ay), 0, (dt3 * noise_ay),
+       (dt3 * noise_ax), 0, (dt2 * noise_ax), 0,
+       0, (dt3 * noise_ay), 0, (dt2 * noise_ay);
+
+  ekf_.Predict(Q);
 
   /*****************************************************************************
    *  Update
@@ -145,13 +145,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
-    ekf_.R_ = R_radar_;
-    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+    ekf_.UpdateEKF(measurement_pack.raw_measurements_, R_radar_);
   } else {
     // Laser updates
-    ekf_.R_ = R_laser_;
-    ekf_.H_ = H_laser_;
-    ekf_.Update(measurement_pack.raw_measurements_);
+    ekf_.Update(measurement_pack.raw_measurements_, H_laser_, R_laser_);
   }
 
   previous_timestamp_ = measurement_pack.timestamp_;
