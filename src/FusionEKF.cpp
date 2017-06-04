@@ -20,16 +20,15 @@ FusionEKF::FusionEKF() {
   R_laser_ = MatrixXd(2, 2);
   R_radar_ = MatrixXd(3, 3);
   H_laser_ = MatrixXd(2, 4);
-  Hj_ = MatrixXd(3, 4);
 
-  //measurement covariance matrix - laser
+  // Measurement covariance matrix - laser
   R_laser_ << 0.0225, 0,
-        0, 0.0225;
+              0, 0.0225;
 
-  //measurement covariance matrix - radar
+  // Measurement covariance matrix - radar
   R_radar_ << 0.09, 0, 0,
-        0, 0.0009, 0,
-        0, 0, 0.09;
+              0, 0.0009, 0,
+              0, 0, 0.09;
 
   /**
     * Finish initializing the FusionEKF.
@@ -76,25 +75,23 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
          0, 0, 1000, 0,
          0, 0, 0, 1000;
 
-    if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      /**
-      Convert radar from polar to cartesian coordinates and initialize state.
-      */
+    if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)
+    {
+      // Convert radar from polar to cartesian coordinates and initialize state.
       VectorXd x = Tools::ConvertPolarToCartesian(measurement_pack.raw_measurements_);
 
       ekf_.Init(x, P, F);
     }
-    else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
-      /**
-      Initialize state.
-      */
+    else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER)
+    {
+      // Initialize state.
       VectorXd x(4);
       x << measurement_pack.raw_measurements_(0), measurement_pack.raw_measurements_[1], 0, 0;
 
       ekf_.Init(x, P, F);
     }
 
-    // done initializing, no need to predict or update
+    // Done initializing, no need to predict or update
     is_initialized_ = true;
 
     previous_timestamp_ = measurement_pack.timestamp_;
@@ -108,6 +105,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   static const double c_microsecondsPerSecond = 1000000;
 
+  // Timestamps from measurement_pack are in microseconds.
   auto dt = (measurement_pack.timestamp_ - previous_timestamp_) / c_microsecondsPerSecond;
 
   // Update the state transition matrix F according to the new elapsed time.

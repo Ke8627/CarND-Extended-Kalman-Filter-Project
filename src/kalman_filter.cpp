@@ -1,5 +1,4 @@
 #include <cmath>
-#include <iostream>
 #include "kalman_filter.h"
 #include "tools.h"
 
@@ -35,7 +34,7 @@ void KalmanFilter::Update(const VectorXd &z, const MatrixXd &H, const MatrixXd &
   UpdateGeneralized(y, H, R);
 }
 
-void NormalizePhi(VectorXd& y)
+static void NormalizePhi(VectorXd& y)
 {
   static const double two_pi = 2 * M_PI;
 
