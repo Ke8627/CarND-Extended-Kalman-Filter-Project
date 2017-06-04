@@ -86,7 +86,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     {
       // Initialize state.
       VectorXd x(4);
-      x << measurement_pack.raw_measurements_(0), measurement_pack.raw_measurements_[1], 0, 0;
+      x << measurement_pack.raw_measurements_(0),
+           measurement_pack.raw_measurements_[1],
+           0,
+           0;
 
       ekf_.Init(x, P, F);
     }
@@ -141,10 +144,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Update the state and covariance matrices.
    */
 
-  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)
+  {
     // Radar updates
     ekf_.UpdateEKF(measurement_pack.raw_measurements_, R_radar_);
-  } else {
+  }
+  else
+  {
     // Laser updates
     ekf_.Update(measurement_pack.raw_measurements_, H_laser_, R_laser_);
   }
